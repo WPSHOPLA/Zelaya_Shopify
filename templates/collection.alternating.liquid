@@ -1,0 +1,57 @@
+{% assign enable-tag-filtering = false %}
+{% assign collection-background-style = 'default' %}
+
+{% paginate collection.products by settings.collection-products-per-page %}
+  <div class="module-wrapper style-{{ collection-background-style }}">
+    <div class="module collection collection-alternating">
+      <div class="module-header collection-header">
+        <div class="module-title">
+          {% if collection.handle == 'all' %}
+            <h1>{{ 'collections.collection.all_products' | t }}</h1>
+          {% else %}
+            <h1>{{ collection.title }}</h1>
+          {% endif %}
+        </div>
+        {% if collection.description != blank %}
+          <div class="module-subtitle collection-subtitle rte">
+            {{ collection.description }}
+          </div>
+        {% endif %}
+      </div>
+      <div class="module-body collection-body">
+        {% if collection.all_tags.size > 0 and enable-tag-filtering %}
+          {% include 'collection-tag-selector' %}
+        {% endif %}
+        {% assign product_count = collection.products.size | plus: 0 %}
+        <div class="collection-list">
+          {% if product_count > 0 %}
+            {% for product in collection.products %}
+              {% assign item = product %}
+              {% if settings.product-stock-level-overlay and item.available %}
+                {% assign total = 0 %}
+                {% assign threshold = settings.product-stock-level-overlay-threshold | times: 1 %}
+                {% assign infinity = false %}
+                {% for variant in item.variants %}
+                  {% if variant.inventory_management == null or variant.inventory_management == '' %}
+                    {% assign infinity = true %}
+                  {% elsif infinity == false %}
+                    {% capture temp %}{{ total | plus: variant.inventory_quantity }}{% endcapture %}
+                    {% assign total = temp | times: 1 %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+              {% capture collection-alternating-cycle %}{% cycle 'left', 'right' %}{% endcapture %}
+              {% include 'collection-alternating' %}
+            {% endfor %}
+          {% else %}
+            <p class="empty">{{ 'collections.collection.no_products' | t }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% if paginate.previous or paginate.next %}
+    {% include 'pagination' %}
+  {% endif %}
+{% endpaginate %}
+

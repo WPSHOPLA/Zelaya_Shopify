@@ -1,0 +1,40 @@
+<nav class="navigation">
+  <ul class="header-navigation-list clearfix">
+    {% for link in linklists.main-menu.links %}
+      {% capture link_handle %}{{ link.title | handle | strip }}{% endcapture %}
+      {% assign has-dropdown = false %}
+      {% if linklists[link_handle] and linklists[link_handle].links.size > 0 %}
+        {% assign has-dropdown = true %}
+      {% endif %}
+      <li class="header-navigation-list-item{% if has-dropdown %} has-dropdown{% endif %}" tabindex="-1">
+        <a
+          class="header-navigation-link primary-link {% if link.active %}header-navigation-current{% endif %}"
+          href="{{ link.url }}"
+          tabindex="0"
+          {% if has-dropdown %}data-has-dropdown{% endif %}
+        >
+          {{ link.title }}
+        </a>
+        {% if has-dropdown %}
+          {% if showArrows %}
+            <a class="icon icon-angle-down header-navigation-list-arrow" tabindex="0" data-has-dropdown></a>
+          {% endif %}
+          <ul class="header-navigation-list secondary-list clearfix" data-is-dropdown>
+            {% for link in linklists[link_handle].links %}
+              {% capture link_handle %}{{ link.title | handle }}{% endcapture %}
+              {% assign has-dropdown = false %}
+              {% if linklists[link_handle] and linklists[link_handle].links.size > 0 %}
+                {% assign has-dropdown = true %}
+              {% endif %}
+              <li class="header-navigation-list-item secondary-list-item">
+                <a class="header-navigation-link secondary-link" href="{{ link.url }}" tabindex="0">
+                  {{ link.title }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</nav>

@@ -1,0 +1,125 @@
+{% comment %}
+  Set the extension of your color files below. Use 'png', 'jpeg', 'jpg' or 'gif'.
+{% endcomment %}
+
+{{ 'panda-swatches.css' | asset_url | stylesheet_tag }}
+
+{% assign file_extension = 'png' %}
+
+{% if panda-swatch != blank %}
+
+{% assign found_option = false %}
+{% assign is_color = false %}
+{% assign option_index = 0 %}
+
+{% for option in product.options %}
+  {% if option == panda-swatch %}
+    {% assign found_option = true %}
+    {% assign option_index = forloop.index0 %}
+    {% assign option_index_to_hide = forloop.index %}
+
+    <style>
+    .selector-wrapper:nth-of-type({{option_index_to_hide}}){ display: none; }
+    </style>
+
+    {% comment %}
+    <style>
+      label[for="product-select-option-{{ option_index }}"] { display: none; }
+      #product-select-option-{{ option_index }} { display: none; }
+      #product-select-option-{{ option_index }} + .custom-style-select-box { display: none !important; }
+      .selector-wrapper:nth-of-type({{option_index_to_hide}}){ display: none; }
+    </style>
+  {% endcomment %}
+	<script>$(window).load(function() { $('.selector-wrapper:eq({{ option_index }})').hide(); });</script>
+
+    {% assign downcased_option = panda-swatch | downcase %}
+    {% if downcased_option contains 'color' or downcased_option contains 'colour' or downcased_option contains 'color' %}
+      {% assign is_color = true %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+{% if found_option %}
+
+
+<div class="swatch-panda clearfix" data-option-index="{{ option_index }}">
+  <div class="panda-header">{{panda-swatch}}</div>
+  {% assign values = '' %}
+  {% for variant in product.variants %}
+    {% assign value = variant.options[option_index] %}
+    {% unless values contains value %}
+      {% assign values = values | join: ',' %}
+      {% assign values = values | append: ',' | append: value %} 
+      {% assign values = values | split: ',' %}
+      <div data-value="{{ value | escape }}" class="v2-color-box {% if is_color %}color {% endif %}{{ value | handle }} {% if variant.available %}available{% else %}soldout{% endif %}">
+        {% if is_color %}
+        <div class="tooltip">{{ value }}
+          <div class="triangle-top"> </div>
+        </div>
+        
+        {% endif %}
+        <input id="swatch-{{ option_index }}-{{ value | handle }}" type="radio" name="option-{{ option_index }}" value="{{ value | escape }}"{% if forloop.first %} checked{% endif %} {% unless variant.available %}disabled{% endunless %} />
+        {% if is_color %}
+        <div>
+        <label class="bg-edit" for="swatch-{{ option_index }}-{{ value | handle }}" style="background-color: {{ value | split: ' ' | last | handle }}; background-image: url({{ value | handle | append: '.' | append: file_extension | asset_url }})">
+        </label>
+        </div>
+        {% else %}
+        <label for="swatch-{{ option_index }}-{{ value | handle }}">
+          {{ value }}
+        </label>
+        {% endif %}
+      </div>
+    {% endunless %}
+    <script>
+      jQuery('.swatch-panda[data-option-index="{{ option_index }}"] .{{ value | handle }}').removeClass('soldout').addClass('available').find(':radio').removeAttr('disabled');
+    </script>
+  {% endfor %}
+</div>
+
+
+<script>
+var option_hide = {{ option_index }};
+</script>
+
+{{ 'script_p.js' | asset_url | script_tag }}
+<script>
+  var optionIndex2 = $('.swatch-panda').attr('data-option-index');
+
+  setTimeout(function(){
+  	$("[for='ProductSelect-option-"+ optionIndex2 +"']").addClass("hide");
+
+    console.log(optionIndex2, $("[for='ProductSelect-option-"+ optionIndex2 +"']"))
+
+  }, 1000);
+
+jQuery(function() {
+  jQuery('.swatch-panda :radio').change(function() {
+    var optionIndex = jQuery(this).closest('.swatch-panda').attr('data-option-index');
+    var optionValue = jQuery(this).val();
+    jQuery(this)
+      .closest('form')
+      .find('.single-option-selector')
+      .eq(optionIndex)
+      .val(optionValue)
+      .trigger('change');
+
+  jQuery(this)
+  .closest('form')
+  .find('fieldset')
+  .find('input[value="'+optionValue+'"]')
+  .trigger('click');
+  });
+
+  var count = 0;
+    $('.product-single__photo-wrapper').each(function(){
+     count++;
+
+      if(count > 3 && count < 5){
+     $('.social-sharing').append("<div style='height:300px'></div>");
+    }
+    });
+});
+</script>
+	{% endif %}
+{% endif %}

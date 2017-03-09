@@ -1,0 +1,50 @@
+
+{% capture themeSettingsLink %}
+  <a href="{{ shop.url }}/admin/themes">{{ 'onboarding.theme_settings_link' | t | downcase }}</a>
+{% endcapture %}
+
+{% assign homeModules = '' %}
+{% for i in (1..11) %}
+  {% capture module %}home-module-{{ i }}{% endcapture %}
+  {% unless settings[module] == 'none' or homeModules contains settings[module] %}
+    {% capture homeModules %}{{ homeModules }}-{{ settings[module] }}{% endcapture %}
+  {% endunless %}
+{% endfor %}
+{% assign homeModules = homeModules | remove_first: '-' %}
+{% if homeModules != blank %}
+  {% assign sections = homeModules | split: '-' %}
+  {% for section in sections %}
+    {% case section %}
+      {% when 'slideshow' %}
+        {% include 'home-slideshow' %}
+      {% when 'A' %}
+        {% include 'home-full-width' %}
+      {% when 'B' %}
+        {% include 'home-left-right' %}
+      {% when 'C' %}
+        {% include 'home-in-line' %}
+      {% when 'D' %}
+        {% include 'made-to-order' %}
+      {% when 'E' %}
+        {% include 'home-products' %}
+      {% when 'F' %}
+        {% include 'product-focus' %}
+      {% when 'G' %}
+        {% include 'home-featured-images' %}
+      {% when 'H' %}
+        {% include 'home-goal' %}
+      {% when 'I' %}
+        {% include 'home-blog' %}
+      {% when 'J' %}
+        {% include 'home-testimonials' %}	 
+	  {% when 'K' %}
+        {% include 'home-full-width-2' %}
+	  
+    {% endcase %}
+  {% endfor %}
+{% endif %}
+
+{% if settings.display-mailing-list %}
+  {% include 'mailing-list' %}
+{% endif %}
+

@@ -1,0 +1,176 @@
+<div class="module-wrapper">
+  <div class="module cart">
+    <div class="module-header cart-header">
+      <h1 class="module-title">{{ 'cart.header' | t }}</h1>
+    </div>
+    <div class="module-body">
+      <div class="module-content">
+        {% if cart.item_count > 0 %}
+          <form action="/cart" method="post">
+            <div class="cart-items-container">
+              <table class="cart-items clean">
+                <thead class="cart-items-thead">
+                  <tr>
+                    <th class="first">{{ 'general.general.product' | t}}</th>
+                    <th>{{ 'general.general.price' | t }}</th>
+                    <th>{{ 'general.general.quantity' | t }}</th>
+                    <th class="last">{{ 'general.general.total' | t }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in cart.items %}
+                    <tr
+                      class="cart-item variant-{{ item.variant.id }} {% include 'for-looper' %}"
+                      data-variant="{{ item.variant.id }}"
+                      data-title="{{ item.product.title }}"
+                      data-url="{{ item.url }}">
+                      <td class="cart-item-product cart-item-td">
+                        <div class="cart-item-image-container">
+                          <a class="cart-image" href="{{ item.url }}">
+                            <img src="{{ item | img_url: 'small' }}" alt="{{ item.product.title }}">
+                          </a>
+                          <a class="cart-item-remove mobile-only" href="/cart/change?line={{ forloop.index }}&amp;quantity=0">
+                            <span class="icon icon-cross"></span>
+                          </a>
+                        </div>
+                        <div class="cart-item-product-wrap">
+                          <span class="cart-title"><a href="{{ item.url }}">{{ item.product.title }}</a></span>
+                          <span class="cart-vendor vendor">{{ item.vendor }}</span>
+                         
+                          {% unless item.variant.title == 'Default Title' %}
+                            <span class="cart-variant">{{ item.variant.title }}</span>
+                          {% endunless %}
+                           {% for p in item.properties %}
+                          {% unless p.last == blank %}
+                               <span class="cart-variant"><i>{{p.first}}</i>: {{ p.last }}</span>
+                          	{% endunless %} 
+                     	  {% endfor %}
+                        </div>
+                        
+                      </td>
+                      <td class="cart-item-price cart-item-td">
+                        <div class="cart-item-unit-price">
+                          <span class="mobile-only">{{ 'general.general.price' | t }}:</span>
+                          <span class="money">{{ item.price | money }}</span>
+                        </div>
+                      </td>
+                      {% unless item.variant.inventory_management == blank or item.variant.inventory_policy == 'continue' %}
+                        {% assign inventory = true %}
+                      {% endunless %}
+                      <td class="cart-item-quantity cart-item-td" {% if inventory == true %}data-max="{{ item.variant.inventory_quantity }}"{% endif %}>
+                        <div class="number-input-wrapper cart-item-quantity-wrapper clearfix">
+                          <div class="number-input-field">
+                            <input type="number" id="cart-item-{{ item.id }}" name="updates[]" class="cart-item-quantity-display" value="{{ item.quantity }}" size="1"  aria-label="{{ "general.general.quantity" | t }}" />
+                            <label class="number-input-label" for="cart-item-{{ item.id }}">{{ 'general.general.quantity' | t }}</label>
+                          </div>
+                          <div class="number-input-nav">
+                            <div class="number-input-nav-item icon icon-plus cart-item-increase"></div>
+                            <div class="number-input-nav-item icon icon-minus cart-item-decrease"></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="cart-item-total cart-item-td">
+                        <div class="cart-item-total-container">
+                          <span class="mobile-only">{{ 'general.general.total' | t }}:</span>
+                          <span class="money">{{ item.quantity | times: item.price | money }}</span>
+                          <a class="cart-item-remove" href="/cart/change?line={{ forloop.index }}&amp;quantity=0">
+                            <span class="icon icon-cross"></span>
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <div class="cart-tools">
+              <div class="cart-totals">
+                <div class="cart-price-info">
+                  <p class="sub-total">{{ 'general.general.subtotal' | t}}</p>
+                  <p class="cart-price"><span class="money">{{ cart.total_price | money }}</span></p>
+                  <p class="cart-message meta">{{ 'cart.tax_and_shipping' | t }}</p>
+                  {% if settings.show-currency-switcher %}
+                    <p class="cart-currency-note meta">{{ 'cart.currency_note_html' | t: currency: shop.currency }}</p>
+                  {% endif %}
+                </div>
+                <div class="cart-cta">
+                  <input type="submit" name="update" value="{{ 'cart.update_button' | t }}" class="button outline cart-button cart-update-button">
+                  <input type="submit" name="checkout" value="{{ 'cart.submit' | t }}" class="button secondary inverse cart-button">
+                  {% if additional_checkout_buttons %}
+                    <div class="cart-additional-checkout-buttons">
+                      {{ content_for_additional_checkout_buttons }}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+              {% if settings.cart-show-special-instructions %}
+                <div class="cart-instructions">
+                  <p><label for="cart-notes">{{ 'cart.instructions_title' | t }}</label></p>
+                  <textarea rows="6" name="note" id="cart-notes" placeholder="{{ 'cart.instructions_placeholder' | t }}">{{ cart.note }}</textarea>
+                </div>
+              {% endif %}
+            </div>
+          </form>
+          <div class="cart-modal-wrapper">
+            <div class="cart-modal">
+              <h3 class="section-title"></h3>
+              <div class="cart-modal-message"></div>
+              <div class="cart-modal-action"></div>
+            </div>
+          </div>
+          {% if settings.show-shipping-calculator %}
+            <div class="cart-shipping-calculator-wrapper">
+              <div id="shipping-calculator" class="cart-shipping-calculator">
+                <p><label for="address_country">{{ 'cart.shipping_calculator.header' | t }}</label></p>
+                <div class="shipping-country-wrapper hide-labels">
+                  <div class="country-select select-wrapper">
+                    <div class="selected-text" data-default="{{ 'cart.shipping_calculator.country' | t }}">{{ 'cart.shipping_calculator.country' | t }}</div>
+                    <select
+                      class="styled-select address-country"
+                      id="address_country"
+                      name="address[country]"
+                      aria-label="{{ 'cart.shipping_calculator.country' | t }}"
+                      data-default="{% if shop.customer_accounts_enabled and customer %}{{ customer.default_address.country }}{% elsif settings.shipping_calculator_default_country != '' %}{{ settings.shipping_calculator_default_country }}{% endif %}">{{ country_option_tags }}
+                    </select>
+                  </div>
+                </div>
+                <div id="address_province_container" class="shipping-province-wrapper">
+                  <div class="province-select select-wrapper">
+                    <div class="selected-text" data-default="{{ 'cart.shipping_calculator.province' | t }}">{{ 'cart.shipping_calculator.province' | t }}</div>
+                    <select
+                      class="styled-select address-province address_form"
+                      id="address_province"
+                      name="address[province]"
+                      aria-label="{{ 'cart.shipping_calculator.province' | t }}"
+                      data-default="{% if shop.customer_accounts_enabled and customer and customer.default_address.province != '' %}{{ customer.default_address.province }}{% endif %}">
+                    </select>
+                  </div>
+                </div>
+                <div class="cart-shipping-zip-code input-wrapper">
+                  <input
+                    type="text"
+                    size="12"
+                    class="address-zip"
+                    id="address_zip"
+                    placeholder="{{ 'customer.addresses.zip' | t }}"
+                    aria-label="{{ 'customer.addresses.zip' | t }}"
+                    name="address[zip]"
+                    {% if shop.customer_accounts_enabled and customer %}value="{{ customer.default_address.zip }}"{% endif %} />
+                  <input
+                    type="button"
+                    class="cart-shipping-calculate get-rates button"
+                    aria-label="{{ 'cart.shipping_calculator.submi' | t }}"
+                    value="{{ 'cart.shipping_calculator.submit' | t }}" />
+                </div>
+              </div>
+              <div class="cart-shipping-calculator-response">
+              </div>
+            </div>
+          {% endif %}
+        {% else %}
+          <p class="empty">{{ 'cart.empty' | t }} <a href="{{ shop.url }}/collections/all">{{ 'cart.continue' | t }}</a></p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

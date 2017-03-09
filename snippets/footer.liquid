@@ -1,0 +1,176 @@
+{% unless template contains 'index' %}
+  {% if settings.display-mailing-list %}
+    {% include 'mailing-list' %}
+  {% endif %}
+{% endunless %}
+
+{% assign instagram = false %}
+{% if settings.instagram-widget and settings.home-instagram-access-token != blank %}
+  {% assign instagram = true %}
+{% endif %}
+
+{% assign twitter = false %}
+{% if settings.twitter-widget and settings.social-twitter-url != blank %}
+  {% assign twitter = true %}
+{% endif %}
+
+{% assign widget_fullwidth = true %}
+{% if twitter and instagram %}
+  {% assign widget-two-column = true %}
+  {% assign widget_fullwidth = false %}
+{% endif %}
+
+{% comment %} Determine whether to show footer links or not {% endcomment %}
+{% assign hasFooterLists = false %}
+{% assign footerMenuCount = 0 %}
+{% for x in (1..2) %}
+  {% capture list %}footer-link-list-{{x}}{% endcapture %}
+  {% capture listname %}{{ settings[list] }}{% endcapture %}
+  {% if linklists[listname].links != blank %}
+    {% assign hasFooterLists = true %}
+    {% assign footerMenuCount = footerMenuCount | plus: 1 %}
+  {% endif %}
+{% endfor %}
+
+{% assign showSocialMediaMenu = false %}
+{% if settings.use-social-media-in-footer %}
+  {% assign showSocialMediaMenu = true %}
+  {% assign footerMenuCount = footerMenuCount | plus: 1 %}
+{% endif %}
+
+{% assign showFooterQuote = false %}
+{% if settings.footer-quote-title != blank or settings.footer-quote-content != blank %}
+  {% assign showFooterQuote = true %}
+{% endif %}
+
+{% assign onlyOneMenuInFooter = false %}
+{% if footerMenuCount == 1 %}
+  {% unless showFooterQuote or settings.footer-logo %}
+    {% assign onlyOneMenuInFooter = true %}
+  {% endunless %}
+{% endif %}
+
+{% if instagram or twitter %}
+  <div class="module-wrapper">
+    <div class="module footer-widget {% if widget_fullwidth %}full-width{% endif %}">
+      <div class="module-body footer-widget-body {% if widget-two-column %}column-2{% endif %} clearfix">
+        {% if instagram %}
+          <div class="footer-widget-item instagram">
+            {% include 'footer-instagram' %}
+          </div>
+        {% endif %}
+        {% if twitter %}
+          <div class="footer-widget-item twitter">
+            {% include 'footer-twitter' %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+<div class="footer-wrapper style-{{ settings.footer-background-style }} {% if settings.footer-enable-borders %}has-borders{% endif %}">
+  <footer class="main-footer">
+
+    {% if showFooterQuote or hasFooterLists or showSocialMediaMenu or settings.footer-logo %}
+      <div class="footer-row clearfix borderb">
+
+        {% if settings.footer-logo %}
+          <div class="footer-site-logo-container main-footer-module {% unless hasFooterLists or showSocialMediaMenu or showFooterQuote %}wide-logo-container{% else %}normal-logo-container{% endunless %}">
+            <a class="footer-site-logo-anchor" href="/">
+              {% if settings.use-logo %}
+                {% if settings.use-alternate-logo and settings.footer-background-style == 'dark' %}
+                  <img class="footer-logo-image footer-logo-alternate" alt="{{ shop.name | escape }}" src="{{ 'alternate-logo.png' | asset_url }}" data-regular="{{ 'alternate-logo.png' | asset_url }}">
+                {% else %}
+                  <img class="footer-logo-image footer-logo-regular" alt="{{ shop.name | escape }}" src="{{ 'logo2.png' | asset_url }}" data-regular="{{ 'logo.png' | asset_url }}">
+               {% endif %}
+              {% else %}
+                <h2 class="branding-logo">{{ shop.name }}</h2>
+              {% endif %}
+            </a>
+          </div>
+        {% endif %}
+
+        {% if hasFooterLists or showSocialMediaMenu %}
+          <div class="footer-link-list-container container-of-{{ footerMenuCount }} main-footer-module {% if onlyOneMenuInFooter and showSocialMediaMenu %}social-menu-only{% endif %}">
+            {% for x in (1..2) %}
+              {% capture list %}footer-link-list-{{x}}{% endcapture %}
+              {% capture listname %}{{ settings[list] }}{% endcapture %}
+              {% if linklists[listname].links != blank %}
+                <div class="footer-link-list">
+                  <h4 class="footer-title footer-link-list-title">{{ linklists[listname].title }}</h4>
+                  <ul class="footer-link-list-links">
+                    {% for link in linklists[listname].links %}
+                      <li class="footer-link-list-links-item">
+                        <a class="footer-link-list-links-item-anchor" href="{{ link.url }}">{{ link.title }}</a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            {% endfor %}
+
+            {% if showSocialMediaMenu %}
+              <div class="footer-link-list">
+                <h4 class="footer-title footer-link-list-title">{{ "general.social.social" | t }}</h4>
+                <ul class="footer-link-list-links">
+                  {% assign social_media_accounts = "facebook|twitter|google|pinterest|instagram|vimeo|youtube|rss" | split: "|" %}
+                  {% for account in social_media_accounts %}
+                    {% capture url %}social-{{account}}-url{% endcapture %}
+                   {% capture socialiconname %}social-{{account}}-icon{% endcapture %}
+                    {% if settings[url] != blank %}
+                      <li class="footer-link-list-links-item">
+                        {% if settings[socialiconname] != blank %}
+                    {% include 'font-icon', icon: settings[socialiconname], class: 'product-focus-list-item-icon', title: settings[title] %}
+                  {% endif %}
+                        <a class="footer-link-list-links-item-anchor" href="{{ settings[url] }}">{% unless account == 'google' %}{{ account | capitalize }}{% else %}{{ account | capitalize | append: '+' }}{% endunless %}</a>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if showFooterQuote %}
+          <div class="footer-quote-container main-footer-module">
+            <div class="footer-quote">
+              {% if settings.footer-quote-title != blank %}
+                <h4 class="footer-title footer-quote-title">{{ settings.footer-quote-title }}</h4>
+              {% endif %}
+              {% if settings.footer-quote-content != blank %}
+                <p class="footer-quote-content">{{ settings.footer-quote-content }}</p>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+
+      </div>
+    {% endif %}
+
+    <div class="footer-row clearfix">
+      <div role="contentinfo"  class="footer-information">
+        <p class="footer-copyright">
+          {% capture year %}{{ "now" | date: "%Y" }}{% endcapture %}
+          {{ 'general.general.copyright_text_html' | t: year: year }} <font class="color-b"> Zelaya Shoes</font>
+        </p>
+
+        {% if shop.enabled_payment_types.size > 0 and settings.footer-show-payment-options %}
+          <ul class="payment-icons">
+            {% comment %}
+              - Use the following code to test all payment types, based on the supplied list
+              from Shopify (https://help.shopify.com/themes/customization/store/add-credit-card-icons)
+              - Note that 'Dodgecoin' is actually 'dogecoin', so CSS should use both spellings just in case
+              {% assign payment_types_all = 'amazon_payments|american_express|bitcoin|dankort|diners_club|discover|dodgecoin|dogecoin|dwolla|forbrugsforeningen|jcb|litecoin|maestro|master|paypal|visa|cirrus|interac|stripe' %}
+              {% assign payment_types_all = payment_types_all | split: '|' %}
+            {% endcomment %}
+            {% for type in shop.enabled_payment_types %}
+              <li class="payment-icon-{{ type | replace: '_','-' }}"></li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    </div>
+  </footer>
+</div>

@@ -1,0 +1,84 @@
+ {% capture imageblock1 %}team-member-process--1.png{% endcapture %}
+ {% capture imageblock2 %}team-member-process--2.png{% endcapture %}
+{% capture url %}team-member-process-button-url{% endcapture %}
+<div class="module-wrapper about-content">
+  <div class="module module-default-page">
+   
+      <div class="module-wrapper style-default borderb">
+    <div class="module team column-2">
+      <div class="module-body clearfix">
+         <div class="list compact team-list ">
+            <div class="list-item">
+                <div class="list-container">
+                  <div id="sliderFrame">
+                    
+        <div id="slider">
+           {% for x in (1..6) %}
+                    {% capture image %}team-member-slider--{{x}}.png{% endcapture %}                   
+           			 <a href="#">
+                		<img src="{{ image | asset_url}}" alt="" />
+          			 </a>
+             {% endfor %}
+        </div>
+      
+        <!--thumbnails-->
+        <div id="thumbs">
+            {% for x in (1..6) %}                    
+              {% capture imgthumb %}team-member-sliderthumb--{{x}}.png{% endcapture %}
+           		 <div class="thumb"><img src="{{ imgthumb | asset_url}}" /></div>
+          	  {% endfor %}
+        </div>
+    </div>
+                 
+                </div>
+              </div>
+            <div class="list-item">
+                <div class="list-container" style="display:inline">
+                  <h1 class="abuttitle">{{ page.title }}</h1>
+                  {% unless page.content == blank %}
+      <div class="module-body page-body rte">
+        {{ page.content }}
+      
+      </div>
+    
+    {% endunless %}
+                </div>
+              </div>
+        </div>
+      </div>
+      </div>
+        <div class="team column-3 padding-top-block padding-bottom-block">
+      <div class="module-body clearfix">
+         <div class="list compact team-list ">
+            <div class="list-item">
+                <div class="list-container">
+                  <div class="block-img">
+                <img src="{{ imageblock1 | asset_url}}" alt="" />  
+                  </div>
+                </div>
+              </div>
+            <div class="list-item" style="padding:0px !important">
+                <div class="list-container" style="display:inline">
+                  <h1 class="abutdesctitle">{{ settings.team-member-process-title }}</h1>
+                 
+      <div class="module-body page-body rte">
+        {{ settings.team-member-process-Description }}
+      </div>  
+                  <div class="module-cta home-left-right-cta padding-t">
+                  <a class="button" href="{{ settings[url] }}">{{ settings.team-member-process-button-text }} <span class="icon icon-angle-right"></span></a>
+                </div>
+                </div>
+              </div>
+           <div class="list-item">
+                <div class="list-container">
+                  <div class="block-img">
+                  <img src="{{ imageblock2 | asset_url}}" alt="" />                 
+                  </div>                
+                  </div>
+                </div>
+              </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>

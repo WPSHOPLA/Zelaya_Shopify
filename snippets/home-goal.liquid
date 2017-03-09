@@ -1,0 +1,63 @@
+{% capture productGoalHandle %}{{ settings.featured-product-main }}{% endcapture %}
+{% if all_products[productGoalHandle].variants.first.inventory_management == "shopify" %}
+  {% if settings.product-goal-starting-quantity != blank %}
+    {% if settings.product-goal != blank %}
+
+      {% capture productGoalStartingQuantity %}{{ settings.product-goal-starting-quantity }}{% endcapture %}
+
+      {% assign productGoalInventory = 0 %}
+      {% for variant in all_products[productGoalHandle].variants %}
+        {% assign productGoalInventory = productGoalInventory | plus: variant.inventory_quantity %}
+      {% endfor %}
+
+      {% capture productGoalPrice %}{{ all_products[productGoalHandle].variants.first.price }}{% endcapture %}
+      {% capture productGoal %}{{ settings.product-goal }}{% endcapture %}
+      {% capture productGoalTotalSold %}{{ productGoalStartingQuantity | minus: productGoalInventory }}{% endcapture %}
+      {% capture productGoalTotalSoldMoney %}{{ productGoalPrice | times: productGoalTotalSold | money_with_currency  }}{% endcapture %}
+      {% capture productGoalTotalTargetMoney %}{{ productGoalPrice | times: productGoal | money_with_currency }}{% endcapture %}
+      {% capture productGoalAchievement %}{{ productGoalTotalSold | times: 100 | divided_by: productGoal | floor }}{% endcapture %}
+      {% capture productGoalDeliveryDate %}{{ settings.product-sale-goal-estimated-delivery-date | trim }}{% endcapture %}
+
+      {% capture productGoalCurrent %}
+        {% if settings.product-goal-use-quantity %}
+          {{ "home.goal.part2_html" | t: total_sold: productGoalTotalSold, target: productGoal }}
+        {% else %}
+          {{ "home.goal.part2_html" | t: total_sold: productGoalTotalSoldMoney, target: productGoalTotalTargetMoney }}
+        {% endif %}
+      {% endcapture %}
+
+      {% assign productGoal = productGoal | plus: 0 %}
+      {% if productGoal > 0 %}
+
+        <div class="module-wrapper style-{{ settings.product-sale-goal-style }} border">
+          <div class="module featured-product-goal">
+            <div class="module-body">
+              <section class="home-goal-container">
+                <span class="home-goal-icon icon icon-star-full"></span>
+                <h1 class="home-goal-text-heading">{{ "home.goal.part1_html" | t: result: productGoalAchievement }}</h1>
+                <h2 class="home-goal-text-subheading">
+                  {{productGoalCurrent | strip_newlines}}
+                </h2>
+                {% if settings.product-sale-goal-estimated-delivery-date != blank %}
+                  <span class="home-goal-text-delivery-date">
+                    {{ productGoalDeliveryDate }}
+                  </span>
+                {% endif %}
+
+                <a class="home-goal-button button" href="{{ all_products[productGoalHandle].url }}">
+                  {% if settings.product-sale-goal-button != blank %}
+                    {{ settings.product-sale-goal-button }}
+                  {% else %}
+                    {{ "home.goal.pre_order" | t }}
+                  {% endif %}
+                  <span class="icon icon-arrow-right"></span>
+                </a>
+              </section>
+            </div>
+          </div>
+        </div>
+
+      {% endif %}
+    {% endif %}
+  {% endif %}
+{% endif %}

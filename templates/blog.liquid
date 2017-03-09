@@ -1,0 +1,56 @@
+{% paginate blog.articles by 3 %}
+
+  <div class="module-wrapper borderb">
+    <div class="module blog">
+      <div class="module-header blog-header">
+        <div class="module-title blog-title">
+          <h1>
+            {% if current_tags %}<a href="{{ blog.url }}">{% endif %}
+            {{ "blogs.blog.title" | t }} - {{ blog.title }}
+            {% if current_tags %}</a>{% endif %}
+            <a class="blog-rss" href="{{ blog.url }}.atom">&#xea9c</a>
+          </h1>
+          <h3 class="blogtitle">Filter by tag: <font >EVENTS RESEARCH UPDATES</font></h3>
+        </div>
+        {% if linklists.blogs.links.size > 0 %}
+          <div class="blog-menu">
+            {% for link in linklists.blogs.links %}
+              <a class="button outline blog-subtitle-button {% if link.url == blog.url %}active{% endif %}" href="{{ link.url }}">{{ link.title }}</a>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      <div class="module-body">
+        {% if blog.tags.size > 0 %}
+          <div class="blog-tags-wrapper">
+            <span>{{ 'blogs.blog.filter_by_tag' | t }}:</span>
+            <div class="blog-tags-list">
+              {% for tag in blog.tags %}
+                <span class="blog-tags-list-item">{{ tag | link_to_tag: tag }}</span>
+              {% endfor %}
+            </div>
+            {% if current_tags %}
+              <div class="blog-tags-current">
+                <p>{{ 'blogs.blog.posts_tagged' | t }} <em>"{{ current_tags.first }}"</em></p>
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+        <div class="post-wrapper">
+          {% for article in blog.articles %}
+            {% include 'article-list-item' %}
+          {% else %}
+            <div class="empty">
+              <p>{{ 'blogs.blog.empty' | t }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if paginate.previous or paginate.next %}
+    {% include 'pagination' %}
+  {% endif %}
+
+{% endpaginate %}
